@@ -1,2 +1,2 @@
 # movie-land
-A project 
+A project to view reviews about Movies from TheMovieDB API build in JavaScript.
