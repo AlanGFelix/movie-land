@@ -2,6 +2,9 @@
   --principal-color:#563761;
   --background-light: #ffffff;
 
+  --load-light: rgb(70, 70, 70);
+  --load-dark: rgb(49, 49, 49);
+
   --principal-font-color: white;
 
   --font-size-title-principal: 32px;
@@ -28,8 +31,8 @@ a{
 
 .header-movies{
   position: relative;
-
-  height: 40vh;
+  min-height: 70px;
+  max-height: 500px;
 }
 
 .header_article-nav{
@@ -42,6 +45,8 @@ a{
   height: 70px;
   
   background-image: linear-gradient(180deg, rgba(14, 13, 13, 0.768) 52%, rgba(255,255,255,0) 100%);
+
+  z-index: 10;
 }
 
 .header-movies_section-title{
@@ -87,19 +92,25 @@ a{
 }
 
 .header_article-movies{
-  height: 100%;
+  display: flex;
+  justify-content: center;
+
+  max-height: 500px;
 
   overflow-y: hidden;
 }
 
+.header_article-movies.load{
+  height: 500px;
+  background-color: var(--load-light);
+}
+
 .article-movies_section-description{
   position: absolute;
-  top: 50px;
+  top: 40%;
 
-  width: 100%;
-  height: 90%;
-  padding: 50px;
-  padding-top: 30%;
+  width: 80%;
+  height: 40%;
 
   color: white;
 
@@ -107,9 +118,24 @@ a{
   backdrop-filter: blur(2px);
 }
 
+.article-movies_section-description.load{
+  padding: 20px;
+  background-color: var(--load-dark);
+}
+
 .article-movies_section-description h2{
-  line-height: 28px;
+  margin-bottom: 10px;
+
+  line-height: 34px;
   font-size: var(--font-size-title-principal);
+}
+
+.article-movies_section-description.load h2.load{
+  width: 100%;
+  height: 30%;
+
+  background-color: var(--load-light);
+  animation: load-animation 2000ms infinite;
 }
 
 .article-movies_section-description span{
@@ -120,11 +146,21 @@ a{
 
   font-size: var(--font-size-principal);
   font-weight: 500;
+  line-height: 22px;
+}
+
+.article-movies_section-description.load span.load{
+  width: 100%;
+  height: 60%;
+
+  background-color: var(--load-light);
+  animation: load-animation 2000ms infinite;
 }
 
 .article-movies_image{
   width: 100%;
 }
+
 
 /*
 *
@@ -160,10 +196,25 @@ a{
   flex-direction: column;
 }
 
-.main_article img{
+.main_article h2.load{
+  width: 50%;
+  height: 42px;
+
+  background-color: var(--load-light);
+  animation: load-animation 2000ms infinite;
+}
+
+.main_article img,
+.main_article div.load{
+  min-width: 150px;
   width: 150px;
   height: 250px;
   border-radius: 15px;
+}
+
+.main_article .load{
+  background: var(--load-light);
+  animation: load-animation 2000ms infinite;
 }
 
 .footer-movies{
@@ -174,8 +225,23 @@ a{
   width: 100vw;
   padding-left: 30px;
 
-  background-color: var(--principal-color);
+  background-image: linear-gradient(180deg, rgba(255,255,255,0) 10%, rgba(14, 13, 13, 0.768) 100%);
   color: var(--principal-font-color);
 
   font-weight: 500;
+}
+
+
+@keyframes load-animation {
+  0%{
+    opacity: 1;
+  }
+
+  50%{
+    opacity: 0.5;
+  }
+
+  100%{
+    opacity: 1;
+  }
 }
