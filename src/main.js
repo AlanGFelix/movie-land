@@ -21,39 +21,49 @@ searchInput.addEventListener('keypress',(e)=>{
 
 exitButon.addEventListener('click',()=>location.hash = '#home');
 
-async function GetTrendingMovies(){
-  let response = await api.get('movie/popular');
-  let movies = response.data.results;
-  let container = document.querySelector('.trending--article-trends .article_container');
-  container.innerHTML = '';
+trendingButton.addEventListener('click',()=>location.hash = '#categorie=trends');
 
-  movies.forEach(movie=> {
-    createMoviePreview(container,movie);
-  });
+function createMovie(container, movie){
+  let divContainer = document.createElement('div');
+  divContainer.classList.add('movie_container');
+
+  let image = document.createElement('img');
+  image.setAttribute('alt',movie.title);
+  if (movie.poster_path != null) {
+    image.src = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`;
+  }
+  let h3 = document.createElement('h3');
+  h3.classList.add('movie-title');
+  let movieTitle = document.createTextNode(movie.title);
+  h3.appendChild(movieTitle);
+  divContainer.append(image,h3);
+  container.appendChild(divContainer);
 }
 
-async function GetMoviesByCategorie(genre, container){
+async function GetTrendingMovies(){
+  let response = await api.get('movie/popular');
+  return response.data.results;
+}
+
+async function GetMoviesByCategorie(genre){
   let responseMovies = await api.get('discover/movie',{
     params:{
       with_genres: genre,
+    }
+  });
+  return responseMovies.data.results;
+}
+
+async function GetMoviesBysearch(search, container){
+  let responseMovies = await api.get('/search/movie',{
+    params:{
+      query: search,
     }
   });
   let movies = responseMovies.data.results;
   console.log(movies);
   movies.forEach(movie=> {
-    createMoviePreview(container,movie);
-  });
-}
-
-async function GetMoviesBysearch(search, container){
-  let responseMovies = await api.get('discover/movie',{
-    params:{
-      with_genres: genre,
-    }
-  });
-  let movies = responseMovies.data.results;
-  movies.forEach(movie=> {
-    createMoviePreview(container,movie);
+    createMovie(container,movie);
   });
 }
 
@@ -91,7 +101,10 @@ async function GetGenresMovies(){
     sectionContainer.append(containerTitle,containerMovies);
     containerGenres.appendChild(sectionContainer);
     
-    GetMoviesByCategorie(genre,containerMovies);
+    let movies = await GetMoviesByCategorie(genre);
+    movies.forEach(movie => {
+      createMovie(containerMovies, movie);
+    });
   });
 }
 
@@ -110,7 +123,7 @@ function ShowMoviesLong(){
   trendingCategorie.classList.add('inactive');
 }
 
-function GetHome(){
+async function GetHome(){
   header.classList.remove('header-movies--details');
   headerNav.classList.remove('article-nav--long');
   exitButon.classList.add('inactive');
@@ -130,26 +143,47 @@ function GetHome(){
     trendingCategorie.classList.remove('inactive');
   }
   trends.classList.remove('inactive');
-  GetTrendingMovies();
+  let container = document.querySelector('.trending--article-trends .article_container');
+  let trendingMovies = await GetTrendingMovies();
+  trendingMovies.forEach(movie=>{
+    createMovie(container, movie);
+  });
   GetGenresMovies();
 }
 
 function GetSearch(){
+  genreTitle.classList.add('inactive');
   let search = location.hash.split('=')[1];
+  let container = document.querySelector('.search .movies_container');
+  container.innerHTML = '';
   ShowMoviesLong();
-
+  GetMoviesBysearch(search, container);
 }
 
-function GetCategorie(){
-  let categorie = location.hash.split('=')[1];
-  let categorieId = categorie.split('-')[0];
-  let categorieName = categorie.split('-')[1];
-  let title = document.querySelector('#search-title');
-  title.innerText = categorieName;
+async function GetCategorie(){
+  genreTitle.classList.remove('inactive');
   let container = document.querySelector('.main_article.movies_container');
   container.innerHTML = '';
   ShowMoviesLong();
-  GetMoviesByCategorie(categorieId, container);
+  let categorie = location.hash.split('=')[1];
+  if(categorie == 'trends'){
+    let movies = await GetTrendingMovies();
+    genreTitle.innerText = 'Trends';
+
+    movies.forEach(movie=> {
+    createMovie(container,movie);
+  });
+  }else{
+    let categorieId = categorie.split('-')[0];
+    let categorieName = categorie.split('-')[1];
+    genreTitle.innerText = categorieName;
+
+    let movies = await GetMoviesByCategorie(categorieId);
+    movies.forEach(movie => {
+      createMovie(container, movie);
+    });
+  }
+  
 }
 
 function GetDetails(){
@@ -187,18 +221,3 @@ ValidateHash();
 window.addEventListener('hashchange',()=>{
   ValidateHash();
 }, false);
-
-function createMoviePreview(container, movie){
-  let divContainer = document.createElement('div');
-  divContainer.classList.add('movie_container');
-
-  let image = document.createElement('img');
-  image.setAttribute('alt',movie.title);
-  image.src = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`;
-  let h3 = document.createElement('h3');
-  h3.classList.add('movie-title');
-  let movieTitle = document.createTextNode(movie.title);
-  h3.appendChild(movieTitle);
-  divContainer.append(image,h3);
-  container.appendChild(divContainer);
-}

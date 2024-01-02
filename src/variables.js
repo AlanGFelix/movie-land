@@ -13,6 +13,8 @@ let detailsInfo = document.querySelector('.details--info');
 let detailsCategorie = document.querySelector('.details--categories');
 let detailsSimilar = document.querySelector('.details--similar-movies');
 let genresCategorie = document.querySelector('.article__genres');
+let trendingButton = document.querySelector('#trending-button');
+let genreTitle = document.querySelector('#search-title');
 //Main Search
 let search = document.querySelector('.main_article.search');
 //Main Categorie
