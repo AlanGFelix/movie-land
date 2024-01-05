@@ -1,3 +1,4 @@
+let historysUrl = [];
 let api = axios.create({
   baseURL: 'https://api.themoviedb.org/3/',
   headers:{
@@ -19,12 +20,22 @@ searchInput.addEventListener('keypress',(e)=>{
   }
 });
 
-exitButon.addEventListener('click',()=>location.hash = '#home');
+exitButon.addEventListener('click',()=>{
+  console.log(historysUrl);
+  if(historysUrl.length <= 1){
+    location.hash = '#home';
+  }else{
+    location.hash = historysUrl[historysUrl.length-2];
+    historysUrl.pop();
+  }
+  console.log(historysUrl);
+});
 
 trendingButton.addEventListener('click',()=>location.hash = '#categorie=trends');
 
 function createMovie(container, movie){
   let divContainer = document.createElement('div');
+  divContainer.addEventListener('click',()=>console.log('click'));
   divContainer.classList.add('movie_container');
 
   let image = document.createElement('img');
@@ -154,6 +165,7 @@ async function GetHome(){
 function GetSearch(){
   genreTitle.classList.add('inactive');
   let search = location.hash.split('=')[1];
+  search = search.replaceAll('%20',' ');
   let container = document.querySelector('.search .movies_container');
   container.innerHTML = '';
   ShowMoviesLong();
@@ -213,6 +225,8 @@ function ValidateHash(){
   ubication.startsWith('#details') ? GetDetails(): 
   location.hash = '#home';
 
+  if(historysUrl[historysUrl.length - 1] != ubication)
+    historysUrl.push(ubication);
   window.scrollTo(0,0);
 }
 
