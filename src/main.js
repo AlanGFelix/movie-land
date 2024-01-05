@@ -8,6 +8,18 @@ let api = axios.create({
     api_key:'349addc21a4cef2c51b020379c9efa28'
   },
 })
+
+function GetRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+
+async function RandomHeader(){
+  let moviesPopular = await GetTrendingMovies();
+  let randomNumber = GetRandomInt(moviesPopular.length-1);
+  let {title,poster_path} = moviesPopular[randomNumber];
+  ChangeImageHeader(title, poster_path);
+}
+
 searchButton.addEventListener('click',(e)=>{
   let busqueda = e.target.parentNode.parentNode.children[0].value;
   location.hash = `#search=${busqueda}`;
@@ -33,22 +45,24 @@ exitButon.addEventListener('click',()=>{
 
 trendingButton.addEventListener('click',()=>location.hash = '#categorie=trends');
 
-function createMovie(container, movie){
-  let divContainer = document.createElement('div');
-  divContainer.addEventListener('click',()=>console.log('click'));
-  divContainer.classList.add('movie_container');
-
-  let image = document.createElement('img');
-  image.setAttribute('alt',movie.title);
-  if (movie.poster_path != null) {
-    image.src = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`;
-  }
-  let h3 = document.createElement('h3');
-  h3.classList.add('movie-title');
-  let movieTitle = document.createTextNode(movie.title);
-  h3.appendChild(movieTitle);
-  divContainer.append(image,h3);
-  container.appendChild(divContainer);
+function createMovies(container, movies){
+  movies.forEach(movie=>{
+    let divContainer = document.createElement('div');
+    divContainer.addEventListener('click',()=>location.hash=`#details=${movie.id}-${movie.title}`);
+    divContainer.classList.add('movie_container');
+  
+    let image = document.createElement('img');
+    image.setAttribute('alt',movie.title);
+    if (movie.poster_path != null) {
+      image.src = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`;
+    }
+    let h3 = document.createElement('h3');
+    h3.classList.add('movie-title');
+    let movieTitle = document.createTextNode(movie.title);
+    h3.appendChild(movieTitle);
+    divContainer.append(image,h3);
+    container.appendChild(divContainer);
+  });
 }
 
 async function GetTrendingMovies(){
@@ -71,11 +85,9 @@ async function GetMoviesBysearch(search, container){
       query: search,
     }
   });
+
   let movies = responseMovies.data.results;
-  console.log(movies);
-  movies.forEach(movie=> {
-    createMovie(container,movie);
-  });
+  createMovies(container,movies);
 }
 
 async function GetGenresMovies(){
@@ -113,9 +125,7 @@ async function GetGenresMovies(){
     containerGenres.appendChild(sectionContainer);
     
     let movies = await GetMoviesByCategorie(genre);
-    movies.forEach(movie => {
-      createMovie(containerMovies, movie);
-    });
+    createMovies(containerMovies, movies);
   });
 }
 
@@ -147,18 +157,12 @@ async function GetHome(){
   search.classList.add('inactive');
   
   genresCategorie.classList.remove('inactive');
-  if(detailsArticle){
-    detailsArticle.classList.remove('inactive');
-    detailsArticle.classList.replace('article__details', 'article--trending');
-  }else{
-    trendingCategorie.classList.remove('inactive');
-  }
+  trendingCategorie.classList.remove('inactive');
+  trendingCategorie.classList.replace('article__details', 'article--trending');
   trends.classList.remove('inactive');
   let container = document.querySelector('.trending--article-trends .article_container');
   let trendingMovies = await GetTrendingMovies();
-  trendingMovies.forEach(movie=>{
-    createMovie(container, movie);
-  });
+  createMovies(container, trendingMovies);
   GetGenresMovies();
 }
 
@@ -181,24 +185,31 @@ async function GetCategorie(){
   if(categorie == 'trends'){
     let movies = await GetTrendingMovies();
     genreTitle.innerText = 'Trends';
-
-    movies.forEach(movie=> {
-    createMovie(container,movie);
-  });
+    createMovies(container,movies);
   }else{
     let categorieId = categorie.split('-')[0];
     let categorieName = categorie.split('-')[1];
     genreTitle.innerText = categorieName;
 
     let movies = await GetMoviesByCategorie(categorieId);
-    movies.forEach(movie => {
-      createMovie(container, movie);
-    });
+    createMovies(container, movies);
   }
   
 }
 
-function GetDetails(){
+function ChangeImageHeader(title, poster_path){
+  imgLong.innerHTML = '';
+  let imgBackground = document.createElement('img');
+  imgBackground.classList.add('article-movies_image');
+  imgBackground.alt = title;
+  imgBackground.id = 'background-header';
+  if (poster_path != null) {
+    imgBackground.src = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2${poster_path}`;
+  }
+  imgLong.appendChild(imgBackground);
+}
+
+async function GetDetails(){
   header.classList.add('header-movies--details');
   headerNav.classList.add('article-nav--long');
   exitButon.classList.remove('inactive');
@@ -214,9 +225,36 @@ function GetDetails(){
   genresCategorie.classList.add('inactive');
   
   trends.classList.add('inactive');
+
+  let [hash, movie] = location.hash.split('=');
+  let [id,name] = movie.split('-');
+  
+  let resultDetails = await api.get(`movie/${id}`);
+  let {title, overview, genres, poster_path} = resultDetails.data;
+  ChangeImageHeader(title, poster_path);
+  let titleText = document.createTextNode(title);
+  movieTitle.innerText = '';
+  movieTitle.appendChild(titleText);
+  let overviewText = document.createTextNode(overview);
+  movieOverview.innerText = '';
+  movieOverview.appendChild(overviewText);
+  movieGenres.innerText = '';
+
+  genres.forEach(genre=>{
+    let span = document.createElement('span');
+    span.innerText = genre.name;
+
+    movieGenres.appendChild(span);
+  });
+
+  let resultRecommendations = await api.get(`movie/${id}/recommendations`);
+  let moviesRecommendations = resultRecommendations.data.results;
+  similarMoviesContainer.innerHTML = '';
+  createMovies(similarMoviesContainer,moviesRecommendations);
 }
 
 function ValidateHash(){
+  RandomHeader();
   let ubication = location.hash;
 
   ubication.startsWith('#home') ? GetHome():

@@ -8,16 +8,19 @@ let imgLong = document.querySelector('.header_article-movies');
 let exitButon = document.querySelector('.exit_button');
 
 //Main Details
-let detailsArticle = document.querySelector('.article__details');
 let detailsInfo = document.querySelector('.details--info');
 let detailsCategorie = document.querySelector('.details--categories');
 let detailsSimilar = document.querySelector('.details--similar-movies');
 let genresCategorie = document.querySelector('.article__genres');
 let trendingButton = document.querySelector('#trending-button');
 let genreTitle = document.querySelector('#search-title');
+let movieTitle = document.querySelector('#details-title');
+let movieOverview = document.querySelector('#details-overview');
+let movieGenres = document.querySelector('#categories-container');
+let similarMoviesContainer = document.querySelector('#similar-movies-container');
 //Main Search
 let search = document.querySelector('.main_article.search');
 //Main Categorie
-let trendingCategorie = document.querySelector('.article--trending');
+let trendingCategorie = document.querySelector('#article-trends');
 //Main Home
 let trends = document.querySelector('.trending--article-trends');
