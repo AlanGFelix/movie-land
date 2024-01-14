@@ -1,3 +1,17 @@
+const callbackObserver = function(entries){
+  entries.forEach((entry)=>{
+    if(entry.isIntersecting){
+      let img = entry.target;
+      let url = img.getAttribute('data-img');
+  
+      img.setAttribute('src',url);
+    }
+  });
+}
+let lazyLoader = new IntersectionObserver(callbackObserver);
+// console.log(observer);
+// observer.observe(document.querySelector('html'));
+
 let historysUrl = [];
 let api = axios.create({
   baseURL: 'https://api.themoviedb.org/3/',
@@ -33,14 +47,12 @@ searchInput.addEventListener('keypress',(e)=>{
 });
 
 exitButon.addEventListener('click',()=>{
-  console.log(historysUrl);
   if(historysUrl.length <= 1){
     location.hash = '#home';
   }else{
     location.hash = historysUrl[historysUrl.length-2];
     historysUrl.pop();
   }
-  console.log(historysUrl);
 });
 
 trendingButton.addEventListener('click',()=>location.hash = '#categorie=trends');
@@ -53,8 +65,11 @@ function createMovies(container, movies){
   
     let image = document.createElement('img');
     image.setAttribute('alt',movie.title);
-    if (movie.poster_path != null) {
-      image.src = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2${movie.poster_path}`;
+    image.setAttribute('width',150);
+    image.setAttribute('height',225);
+    let poster_path = movie.poster_path;
+    if (poster_path != null) {
+      image.setAttribute('data-img',`https://www.themoviedb.org/t/p/w600_and_h900_bestv2${poster_path}`);
     }
     let h3 = document.createElement('h3');
     h3.classList.add('movie-title');
@@ -62,6 +77,7 @@ function createMovies(container, movies){
     h3.appendChild(movieTitle);
     divContainer.append(image,h3);
     container.appendChild(divContainer);
+    lazyLoader.observe(image);
   });
 }
 
@@ -136,6 +152,7 @@ function ShowMoviesLong(){
   exitButon.classList.remove('inactive');
   search.classList.remove('inactive');
   imgLong.classList.add('inactive');
+  footer.classList.remove('inactive');
 
   detailsCategorie.classList.add('inactive');
   detailsSimilar.classList.add('inactive');
@@ -145,11 +162,24 @@ function ShowMoviesLong(){
 }
 
 async function GetHome(){
+  let claseLoad = 'load';
+  let titleHomeContainer = document.querySelector('.article--title-container');
+  let articleHomeContainer = document.querySelector('.trending--article-trends .article_container');
+  let titlesHome = document.querySelector('.principal-title');
+  let buttonHome = document.querySelector('.principal-button');
+  
+  imgLong.classList.remove(claseLoad);
+  titleHomeContainer.classList.remove(claseLoad);
+  articleHomeContainer.classList.remove(claseLoad);
+  titlesHome.classList.remove(claseLoad);
+  buttonHome.classList.remove(claseLoad);
+  RandomHeader();
   header.classList.remove('header-movies--details');
   headerNav.classList.remove('article-nav--long');
   exitButon.classList.add('inactive');
   imgLong.classList.remove('inactive');
-
+  footer.classList.remove('inactive');
+  
   detailsCategorie.classList.add('inactive');
   detailsInfo.classList.add('inactive');
   detailsSimilar.classList.add('inactive');
@@ -166,24 +196,31 @@ async function GetHome(){
   GetGenresMovies();
 }
 
-function GetSearch(){
+async function GetSearch(){
+  moviesSearch.classList.add('load');
   genreTitle.classList.add('inactive');
   let search = location.hash.split('=')[1];
   search = search.replaceAll('%20',' ');
-  let container = document.querySelector('.search .movies_container');
-  container.innerHTML = '';
+  moviesSearch.innerHTML = '';
   ShowMoviesLong();
-  GetMoviesBysearch(search, container);
+  await GetMoviesBysearch(search, moviesSearch);
+  moviesSearch.classList.remove('load');
 }
 
 async function GetCategorie(){
   genreTitle.classList.remove('inactive');
+  genreTitle.innerHTML = '';
+  genreTitle.classList.add('load');
+  
   let container = document.querySelector('.main_article.movies_container');
+  container.classList.add('load');
   container.innerHTML = '';
   ShowMoviesLong();
   let categorie = location.hash.split('=')[1];
   if(categorie == 'trends'){
     let movies = await GetTrendingMovies();
+    container.classList.remove('load');
+    genreTitle.classList.remove('load');
     genreTitle.innerText = 'Trends';
     createMovies(container,movies);
   }else{
@@ -192,24 +229,35 @@ async function GetCategorie(){
     genreTitle.innerText = categorieName;
 
     let movies = await GetMoviesByCategorie(categorieId);
+    container.classList.remove('load');
+    genreTitle.classList.remove('load');
     createMovies(container, movies);
   }
-  
 }
 
 function ChangeImageHeader(title, poster_path){
-  imgLong.innerHTML = '';
   let imgBackground = document.createElement('img');
   imgBackground.classList.add('article-movies_image');
   imgBackground.alt = title;
   imgBackground.id = 'background-header';
   if (poster_path != null) {
-    imgBackground.src = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2${poster_path}`;
+    imgBackground.setAttribute('data-img',`https://www.themoviedb.org/t/p/w600_and_h900_bestv2${poster_path}`);
   }
   imgLong.appendChild(imgBackground);
+  lazyLoader.observe(imgBackground);
 }
 
 async function GetDetails(){
+  footer.classList.add('inactive');
+  let claseLoad = 'load';
+  imgLong.classList.add(claseLoad);
+  detailsInfo.classList.add(claseLoad);
+  movieGenres.classList.add(claseLoad);
+  detailsSimilar.classList.add(claseLoad);
+  similarMoviesContainer.innerHTML = '';
+  movieTitle.innerText = '';
+  movieOverview.innerText = '';
+  movieGenres.innerText = '';
   header.classList.add('header-movies--details');
   headerNav.classList.add('article-nav--long');
   exitButon.classList.remove('inactive');
@@ -232,14 +280,17 @@ async function GetDetails(){
   let resultDetails = await api.get(`movie/${id}`);
   let {title, overview, genres, poster_path} = resultDetails.data;
   ChangeImageHeader(title, poster_path);
+  imgLong.classList.remove(claseLoad);
   let titleText = document.createTextNode(title);
-  movieTitle.innerText = '';
   movieTitle.appendChild(titleText);
+  movieTitle.classList.remove('load');
   let overviewText = document.createTextNode(overview);
-  movieOverview.innerText = '';
   movieOverview.appendChild(overviewText);
-  movieGenres.innerText = '';
+  movieOverview.classList.remove('load');
 
+  movieGenres.classList.remove('load');
+  detailsInfo.classList.remove(claseLoad);
+  detailsSimilar.classList.remove(claseLoad);
   genres.forEach(genre=>{
     let span = document.createElement('span');
     span.innerText = genre.name;
@@ -249,12 +300,12 @@ async function GetDetails(){
 
   let resultRecommendations = await api.get(`movie/${id}/recommendations`);
   let moviesRecommendations = resultRecommendations.data.results;
-  similarMoviesContainer.innerHTML = '';
   createMovies(similarMoviesContainer,moviesRecommendations);
 }
 
 function ValidateHash(){
-  RandomHeader();
+  imgLong.classList.add('load');
+  imgLong.innerHTML = '';
   let ubication = location.hash;
 
   ubication.startsWith('#home') ? GetHome():
@@ -269,6 +320,23 @@ function ValidateHash(){
 }
 
 ValidateHash();
+
+window.addEventListener('DOMContentLoaded',()=>{
+  let claseLoad = 'load';
+  let titleHomeContainer = document.querySelector('.article--title-container');
+  let articleHomeContainer = document.querySelector('.trending--article-trends .article_container');
+  let titlesHome = document.querySelector('.principal-title');
+  let buttonHome = document.querySelector('.principal-button');
+
+  imgLong.classList.remove(claseLoad);
+  titleHomeContainer.classList.remove(claseLoad);
+  articleHomeContainer.classList.remove(claseLoad);
+  titlesHome.classList.remove(claseLoad);
+  buttonHome.classList.remove(claseLoad);
+  detailsInfo.classList.remove(claseLoad);
+  movieGenres.classList.remove(claseLoad);
+  detailsSimilar.classList.remove(claseLoad);
+})
 
 window.addEventListener('hashchange',()=>{
   ValidateHash();

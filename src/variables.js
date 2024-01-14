@@ -20,7 +20,10 @@ let movieGenres = document.querySelector('#categories-container');
 let similarMoviesContainer = document.querySelector('#similar-movies-container');
 //Main Search
 let search = document.querySelector('.main_article.search');
+let moviesSearch= document.querySelector('.search .movies_container');
 //Main Categorie
 let trendingCategorie = document.querySelector('#article-trends');
 //Main Home
 let trends = document.querySelector('.trending--article-trends');
+//Footer
+let footer = document.querySelector('.footer-movies');
