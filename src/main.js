@@ -12,7 +12,6 @@ let lazyLoader = new IntersectionObserver(callbackObserver);
 // console.log(observer);
 // observer.observe(document.querySelector('html'));
 
-let historysUrl = [];
 let api = axios.create({
   baseURL: 'https://api.themoviedb.org/3/',
   headers:{
@@ -27,37 +26,28 @@ function GetRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
+async function GetTrendingMovies({pagination}){
+  let response;
+  if(pagination){
+    response = await api.get('movie/popular',{
+      params: {
+        page: pagesActual,
+      },
+    });
+  }else{
+    response = await api.get('movie/popular');
+  }
+  return response.data.results;
+}
+
 async function RandomHeader(){
-  let moviesPopular = await GetTrendingMovies();
+  let moviesPopular = await GetTrendingMovies({'pagination': false});
   let randomNumber = GetRandomInt(moviesPopular.length-1);
   let {title,poster_path} = moviesPopular[randomNumber];
   ChangeImageHeader(title, poster_path);
 }
 
-searchButton.addEventListener('click',(e)=>{
-  let busqueda = e.target.parentNode.parentNode.children[0].value;
-  location.hash = `#search=${busqueda}`;
-});
-
-searchInput.addEventListener('keypress',(e)=>{
-  if(e.key=='Enter'){
-    let busqueda = e.target.parentNode.children[0].value;
-    location.hash = `#search=${busqueda}`;
-  }
-});
-
-exitButon.addEventListener('click',()=>{
-  if(historysUrl.length <= 1){
-    location.hash = '#home';
-  }else{
-    location.hash = historysUrl[historysUrl.length-2];
-    historysUrl.pop();
-  }
-});
-
-trendingButton.addEventListener('click',()=>location.hash = '#categorie=trends');
-
-function createMovies(container, movies){
+function CreateMovies(container, movies){
   movies.forEach(movie=>{
     let divContainer = document.createElement('div');
     divContainer.addEventListener('click',()=>location.hash=`#details=${movie.id}-${movie.title}`);
@@ -81,29 +71,46 @@ function createMovies(container, movies){
   });
 }
 
-async function GetTrendingMovies(){
-  let response = await api.get('movie/popular');
-  return response.data.results;
-}
+async function GetMoviesByCategorie(genre,{pagination=false}){
+  let responseMovies;
 
-async function GetMoviesByCategorie(genre){
-  let responseMovies = await api.get('discover/movie',{
-    params:{
-      with_genres: genre,
-    }
-  });
+  console.log(pagesActual);
+  if(pagination){
+    responseMovies = await api.get('discover/movie',{
+      params:{
+        with_genres: genre,
+      }
+    });
+  }else{
+    responseMovies = await api.get('discover/movie',{
+      params:{
+        with_genres: genre,
+        page:pagesActual,
+      }
+    });
+  }
   return responseMovies.data.results;
 }
 
-async function GetMoviesBysearch(search, container){
-  let responseMovies = await api.get('/search/movie',{
-    params:{
-      query: search,
-    }
-  });
+async function GetMoviesBysearch(search,{pagination=false}){
+  let responseMovies;
 
-  let movies = responseMovies.data.results;
-  createMovies(container,movies);
+  if(pagination){
+    responseMovies = await api.get('/search/movie',{
+      params:{
+        query: search,
+        page:pagesActual
+      }
+    });
+  }else{
+    responseMovies = await api.get('/search/movie',{
+      params:{
+        query: search,
+      }
+    });
+  }
+
+  return responseMovies.data.results;
 }
 
 async function GetGenresMovies(){
@@ -140,8 +147,8 @@ async function GetGenresMovies(){
     sectionContainer.append(containerTitle,containerMovies);
     containerGenres.appendChild(sectionContainer);
     
-    let movies = await GetMoviesByCategorie(genre);
-    createMovies(containerMovies, movies);
+    let movies = await GetMoviesByCategorie(genre, {'pagination': false});
+    CreateMovies(containerMovies, movies);
   });
 }
 
@@ -191,8 +198,8 @@ async function GetHome(){
   trendingCategorie.classList.replace('article__details', 'article--trending');
   trends.classList.remove('inactive');
   let container = document.querySelector('.trending--article-trends .article_container');
-  let trendingMovies = await GetTrendingMovies();
-  createMovies(container, trendingMovies);
+  let trendingMovies = await GetTrendingMovies({'pagination': false});
+  CreateMovies(container, trendingMovies);
   GetGenresMovies();
 }
 
@@ -203,7 +210,8 @@ async function GetSearch(){
   search = search.replaceAll('%20',' ');
   moviesSearch.innerHTML = '';
   ShowMoviesLong();
-  await GetMoviesBysearch(search, moviesSearch);
+  let movies = await GetMoviesBysearch(search, {'pagination': false});
+  CreateMovies(moviesSearch,movies);
   moviesSearch.classList.remove('load');
 }
 
@@ -212,26 +220,25 @@ async function GetCategorie(){
   genreTitle.innerHTML = '';
   genreTitle.classList.add('load');
   
-  let container = document.querySelector('.main_article.movies_container');
-  container.classList.add('load');
-  container.innerHTML = '';
+  containerMoviesCategorie.classList.add('load');
+  containerMoviesCategorie.innerHTML = '';
   ShowMoviesLong();
   let categorie = location.hash.split('=')[1];
   if(categorie == 'trends'){
-    let movies = await GetTrendingMovies();
-    container.classList.remove('load');
+    let movies = await GetTrendingMovies({'pagination': false});
+    containerMoviesCategorie.classList.remove('load');
     genreTitle.classList.remove('load');
     genreTitle.innerText = 'Trends';
-    createMovies(container,movies);
+    CreateMovies(containerMoviesCategorie,movies);
   }else{
     let categorieId = categorie.split('-')[0];
     let categorieName = categorie.split('-')[1];
     genreTitle.innerText = categorieName;
 
-    let movies = await GetMoviesByCategorie(categorieId);
-    container.classList.remove('load');
+    let movies = await GetMoviesByCategorie(categorieId, {'pagination': false});
+    containerMoviesCategorie.classList.remove('load');
     genreTitle.classList.remove('load');
-    createMovies(container, movies);
+    CreateMovies(containerMoviesCategorie, movies);
   }
 }
 
@@ -300,26 +307,8 @@ async function GetDetails(){
 
   let resultRecommendations = await api.get(`movie/${id}/recommendations`);
   let moviesRecommendations = resultRecommendations.data.results;
-  createMovies(similarMoviesContainer,moviesRecommendations);
+  CreateMovies(similarMoviesContainer,moviesRecommendations);
 }
-
-function ValidateHash(){
-  imgLong.classList.add('load');
-  imgLong.innerHTML = '';
-  let ubication = location.hash;
-
-  ubication.startsWith('#home') ? GetHome():
-  ubication.startsWith('#search') ? GetSearch(): 
-  ubication.startsWith('#categorie') ? GetCategorie(): 
-  ubication.startsWith('#details') ? GetDetails(): 
-  location.hash = '#home';
-
-  if(historysUrl[historysUrl.length - 1] != ubication)
-    historysUrl.push(ubication);
-  window.scrollTo(0,0);
-}
-
-ValidateHash();
 
 window.addEventListener('DOMContentLoaded',()=>{
   let claseLoad = 'load';
@@ -336,8 +325,5 @@ window.addEventListener('DOMContentLoaded',()=>{
   detailsInfo.classList.remove(claseLoad);
   movieGenres.classList.remove(claseLoad);
   detailsSimilar.classList.remove(claseLoad);
-})
-
-window.addEventListener('hashchange',()=>{
   ValidateHash();
-}, false);
+})

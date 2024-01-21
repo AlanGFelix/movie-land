@@ -314,6 +314,7 @@ a{
 .details--info.load h2{
   min-width: 150px;
   width: 100%;
+  height: fit-content;
 }
 
 .main_article div.load,

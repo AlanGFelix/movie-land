@@ -23,6 +23,7 @@ let search = document.querySelector('.main_article.search');
 let moviesSearch= document.querySelector('.search .movies_container');
 //Main Categorie
 let trendingCategorie = document.querySelector('#article-trends');
+let containerMoviesCategorie = document.querySelector('.main_article.movies_container');
 //Main Home
 let trends = document.querySelector('.trending--article-trends');
 //Footer
