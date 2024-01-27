@@ -1,3 +1,5 @@
+
+
 const callbackObserver = function(entries){
   entries.forEach((entry)=>{
     if(entry.isIntersecting){
@@ -9,8 +11,6 @@ const callbackObserver = function(entries){
   });
 }
 let lazyLoader = new IntersectionObserver(callbackObserver);
-// console.log(observer);
-// observer.observe(document.querySelector('html'));
 
 let api = axios.create({
   baseURL: 'https://api.themoviedb.org/3/',
@@ -53,19 +53,34 @@ function CreateMovies(container, movies){
     divContainer.addEventListener('click',()=>location.hash=`#details=${movie.id}-${movie.title}`);
     divContainer.classList.add('movie_container');
   
+    let bannerContainer = document.createElement('div');
+    bannerContainer.classList.add('movie-banner');
+
     let image = document.createElement('img');
     image.setAttribute('alt',movie.title);
     image.setAttribute('width',150);
     image.setAttribute('height',225);
+    image.setAttribute('alt',movie.title);
     let poster_path = movie.poster_path;
     if (poster_path != null) {
       image.setAttribute('data-img',`https://www.themoviedb.org/t/p/w600_and_h900_bestv2${poster_path}`);
     }
+
+    let likeButton = document.createElement('button');
+    likeButton.type = 'button';
+    likeButton.classList.add('like-button');
+    likeButton.addEventListener('click', (event)=>{
+      event.stopPropagation();
+      likeButton.classList.toggle('liked');
+    });
+
+    bannerContainer.append(image, likeButton);
+
     let h3 = document.createElement('h3');
     h3.classList.add('movie-title');
     let movieTitle = document.createTextNode(movie.title);
     h3.appendChild(movieTitle);
-    divContainer.append(image,h3);
+    divContainer.append(bannerContainer,h3);
     container.appendChild(divContainer);
     lazyLoader.observe(image);
   });
@@ -74,7 +89,6 @@ function CreateMovies(container, movies){
 async function GetMoviesByCategorie(genre,{pagination=false}){
   let responseMovies;
 
-  console.log(pagesActual);
   if(pagination){
     responseMovies = await api.get('discover/movie',{
       params:{
@@ -168,6 +182,10 @@ function ShowMoviesLong(){
   trendingCategorie.classList.add('inactive');
 }
 
+async function GetFavoritesMovies(){
+
+}
+
 async function GetHome(){
   let claseLoad = 'load';
   let titleHomeContainer = document.querySelector('.article--title-container');
@@ -180,23 +198,28 @@ async function GetHome(){
   articleHomeContainer.classList.remove(claseLoad);
   titlesHome.classList.remove(claseLoad);
   buttonHome.classList.remove(claseLoad);
+  favoritesmoviesContainer.classList.remove(claseLoad);
   RandomHeader();
   header.classList.remove('header-movies--details');
   headerNav.classList.remove('article-nav--long');
   exitButon.classList.add('inactive');
   imgLong.classList.remove('inactive');
   footer.classList.remove('inactive');
+
+  // Creamos las peliculas favoritas
+  // favoritesmoviesContainer.innerHTML = '';
   
   detailsCategorie.classList.add('inactive');
   detailsInfo.classList.add('inactive');
   detailsSimilar.classList.add('inactive');
-  
   search.classList.add('inactive');
-  
+
   genresCategorie.classList.remove('inactive');
   trendingCategorie.classList.remove('inactive');
   trendingCategorie.classList.replace('article__details', 'article--trending');
   trends.classList.remove('inactive');
+
+  // Creamos las peliculas populares
   let container = document.querySelector('.trending--article-trends .article_container');
   let trendingMovies = await GetTrendingMovies({'pagination': false});
   CreateMovies(container, trendingMovies);

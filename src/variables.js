@@ -26,5 +26,7 @@ let trendingCategorie = document.querySelector('#article-trends');
 let containerMoviesCategorie = document.querySelector('.main_article.movies_container');
 //Main Home
 let trends = document.querySelector('.trending--article-trends');
+let favoritesContainer = document.querySelector('.article--favorites');
+let favoritesmoviesContainer = document.querySelector('.article--favorites .article_container');
 //Footer
 let footer = document.querySelector('.footer-movies');
