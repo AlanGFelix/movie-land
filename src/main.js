@@ -47,6 +47,13 @@ async function RandomHeader(){
   ChangeImageHeader(title, poster_path);
 }
 
+function GetMoviesLiked(){
+  const item = localStorage.getItem('likedMovies');
+  const moviesLiked = item ? JSON.parse(item) :[];
+
+  return moviesLiked;
+}
+
 function CreateMovies(container, movies){
   movies.forEach(movie=>{
     let divContainer = document.createElement('div');
@@ -69,9 +76,27 @@ function CreateMovies(container, movies){
     let likeButton = document.createElement('button');
     likeButton.type = 'button';
     likeButton.classList.add('like-button');
+    let moviesLiked = GetMoviesLiked();
+    const isSaved = moviesLiked.some(movieArray=> movieArray.id == movie.id);
+    if(isSaved){
+      likeButton.classList.add('liked');
+    }
     likeButton.addEventListener('click', (event)=>{
       event.stopPropagation();
-      likeButton.classList.toggle('liked');
+      const movieClicked = {id:movie.id, title:movie.title, poster_path: movie.poster_path};
+      let moviesLiked = GetMoviesLiked();
+      const isSaved = moviesLiked.some(movieArray=> movieArray.id == movieClicked.id)
+      
+      if(isSaved){
+        moviesLiked = moviesLiked.filter(movieArray=> movieArray.id != movieClicked.id);
+        likeButton.classList.remove('liked');
+      }else{
+        moviesLiked.push(movieClicked);
+        likeButton.classList.add('liked');
+      }
+      
+      localStorage.setItem('likedMovies',JSON.stringify(moviesLiked));
+      GetFavoritesMovies();
     });
 
     bannerContainer.append(image, likeButton);
@@ -183,7 +208,10 @@ function ShowMoviesLong(){
 }
 
 async function GetFavoritesMovies(){
+  favoritesmoviesContainer.innerHTML = '';
+  const favoriteMovies = GetMoviesLiked();
 
+  CreateMovies(favoritesmoviesContainer,favoriteMovies);
 }
 
 async function GetHome(){
@@ -207,7 +235,7 @@ async function GetHome(){
   footer.classList.remove('inactive');
 
   // Creamos las peliculas favoritas
-  // favoritesmoviesContainer.innerHTML = '';
+  GetFavoritesMovies();
   
   detailsCategorie.classList.add('inactive');
   detailsInfo.classList.add('inactive');
