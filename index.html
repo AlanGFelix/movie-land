@@ -15,14 +15,30 @@
       <section class="header-movies_section-title">
         <h1 class="header-movies_title">MovieLand</h1>
       </section>
-      <section class="header-movies_section-search">
-        <div class="search_container">
-          <input class="search_input" type="text">
-          <button class="search_button" type="button">
-            <img src="./assets/image/search.svg" alt="search">
-          </button>
-        </div>
-      </section>
+      <div class="header-buttons">
+        <section class="header-movies_section-search">
+          <div class="search_container">
+            <input class="search_input" type="text">
+            <button class="search_button" type="button">
+              <img src="./assets/image/search.svg" alt="search">
+            </button>
+          </div>
+        </section>
+        <select name="languages" class="select-language" id="selectLanguage">
+          <option value="es">
+            ES
+          </option>
+          <option value="en">
+            EN
+          </option>
+          <option value="pt">
+            PT
+          </option>
+          <option value="fr">
+            FR
+          </option>
+        </select>
+      </div>
       <button class="exit_button inactive" type="button">
         <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="512.000000pt" height="512.000000pt" viewBox="0 0 512.000000 512.000000" preserveAspectRatio="xMidYMid meet">
           <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
@@ -52,18 +68,18 @@
         </div>
       </section>
       <section class="details--categories inactive">
-        <h2>Categorias</h2>
+        <h2 id="categoriesTitle">Categorias</h2>
         <div class="categories-container load" id="categories-container">
         </div>
       </section>
       <section class="details--similar-movies inactive">
-        <h2> Películas similares</h2>
+        <h2 id="SimilarTitle"> Películas similares</h2>
         <section class="article_container" id="similar-movies-container">
         </section>
       </section>
       <article class="trending--article-trends">
         <div class="article--title-container load">
-          <h2 class="principal-title load">Trending</h2>
+          <h2 class="principal-title load" id="TrendsTitle">Trending</h2>
           <button class="principal-button load" id='trending-button' type="button">Ver mas</button>
         </div>
         <section class="article_container load">
@@ -72,29 +88,20 @@
     </article>
     <!-- liked movies -->
     <article class="main_article article--favorites">
-      <h2>Favorites</h2>
+      <h2 id="FavoriteTitle" >Favorites</h2>
       <section class="article_container load">
-        <div class="movie_container">
-          <div class="movie-banner">
-            <img width="150" src="https://www.themoviedb.org/t/p/w600_and_h900_bestv2/9GBhzXMFjgcZ3FdR9w3bUMMTps5.jpg" alt="">
-            <button type="button" class="like-button">
-            </button>
-          </div>
-          <h3 class="movie-title"> The Marvels</h3>
-        </div>
       </section>
     </article>
     <!-- categories -->
     <article class="main_article article__genres">
-      <h2>Genres</h2>
+      <h2 id="GenresTitle">Genres</h2>
       <section class="article_container genre__container load">
       </section>
     </article>
     <!-- Search / Categories movies -->
     <article class="main_article search inactive">
-      <h2 id="search-title">Accion</h2>
+      <h2 id="search-title"></h2>
       <section class="main_article movies_container">
-        
       </section>
     </article>
   </main>
@@ -105,6 +112,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
   <script src="./src/variables.js"></script>
+  <script src="./src/languages.js"></script>
   <script src="./src/main.js"></script>
   <script src="./src/navigation.js"></script>
 </body>

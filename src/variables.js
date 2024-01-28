@@ -1,32 +1,38 @@
 //Header
-let header = document.querySelector('.header-movies');
-let headerNav = document.querySelector('.header_article-nav');
-let searchInput = document.querySelector('.search_input');
-let searchButton = document.querySelector('.search_button');
-let imgLong = document.querySelector('.header_article-movies');
+const header = document.querySelector('.header-movies');
+const headerNav = document.querySelector('.header_article-nav');
+const searchInput = document.querySelector('.search_input');
+const searchButton = document.querySelector('.search_button');
+const imgLong = document.querySelector('.header_article-movies');
+const selectLanguage = document.querySelector('#selectLanguage');
 
-let exitButon = document.querySelector('.exit_button');
+const exitButon = document.querySelector('.exit_button');
 
 //Main Details
-let detailsInfo = document.querySelector('.details--info');
-let detailsCategorie = document.querySelector('.details--categories');
-let detailsSimilar = document.querySelector('.details--similar-movies');
-let genresCategorie = document.querySelector('.article__genres');
-let trendingButton = document.querySelector('#trending-button');
-let genreTitle = document.querySelector('#search-title');
-let movieTitle = document.querySelector('#details-title');
-let movieOverview = document.querySelector('#details-overview');
-let movieGenres = document.querySelector('#categories-container');
-let similarMoviesContainer = document.querySelector('#similar-movies-container');
+const detailsInfo = document.querySelector('.details--info');
+const detailsCategorie = document.querySelector('.details--categories');
+const detailsSimilar = document.querySelector('.details--similar-movies');
+const genresCategorie = document.querySelector('.article__genres');
+const trendingButton = document.querySelector('#trending-button');
+const genreTitle = document.querySelector('#search-title');
+const movieTitle = document.querySelector('#details-title');
+const movieOverview = document.querySelector('#details-overview');
+const movieGenres = document.querySelector('#categories-container');
+const similarMoviesContainer = document.querySelector('#similar-movies-container');
+const categoriesTitle = document.querySelector('#categoriesTitle');
+const similarTitle = document.querySelector('#SimilarTitle');
 //Main Search
-let search = document.querySelector('.main_article.search');
-let moviesSearch= document.querySelector('.search .movies_container');
+const search = document.querySelector('.main_article.search');
+const moviesSearch= document.querySelector('.search .movies_container');
 //Main Categorie
-let trendingCategorie = document.querySelector('#article-trends');
-let containerMoviesCategorie = document.querySelector('.main_article.movies_container');
+const trendingCategorie = document.querySelector('#article-trends');
+const containerMoviesCategorie = document.querySelector('.main_article.movies_container');
 //Main Home
-let trends = document.querySelector('.trending--article-trends');
-let favoritesContainer = document.querySelector('.article--favorites');
-let favoritesmoviesContainer = document.querySelector('.article--favorites .article_container');
+const trends = document.querySelector('.trending--article-trends');
+const favoritesContainer = document.querySelector('.article--favorites');
+const favoritesmoviesContainer = document.querySelector('.article--favorites .article_container');
+const trendsTitle = document.querySelector('#TrendsTitle');
+const favoriteTitle = document.querySelector('#FavoriteTitle');
+const genresTitle = document.querySelector('#GenresTitle');
 //Footer
-let footer = document.querySelector('.footer-movies');
+const footer = document.querySelector('.footer-movies');

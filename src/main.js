@@ -1,5 +1,3 @@
-
-
 const callbackObserver = function(entries){
   entries.forEach((entry)=>{
     if(entry.isIntersecting){
@@ -12,15 +10,22 @@ const callbackObserver = function(entries){
 }
 let lazyLoader = new IntersectionObserver(callbackObserver);
 
-let api = axios.create({
-  baseURL: 'https://api.themoviedb.org/3/',
-  headers:{
-    accept: 'application/json',
-  },
-  params: {
-    api_key:'349addc21a4cef2c51b020379c9efa28'
-  },
-})
+let api;
+
+function GetLenguageIndex(){
+  const selectedLanguage = selectLanguage.value;
+  const language = langs.find(language =>language.lang == selectedLanguage)
+  const index = langs.indexOf(language);
+
+  return index;
+}
+
+function ChangeLanguage(){
+  const indexTitle = GetLenguageIndex();
+  const language = langs[GetLenguageIndex()]
+  localStorage.setItem('language',JSON.stringify(language));
+  location.reload();
+}
 
 function GetRandomInt(max) {
   return Math.floor(Math.random() * max);
@@ -153,13 +158,15 @@ async function GetMoviesBysearch(search,{pagination=false}){
 }
 
 async function GetGenresMovies(){
-  let response = await api.get('genre/movie/list');
+  const response = await api.get('genre/movie/list');
   
-  let genres = response.data.genres;
-  let containerGenres = document.querySelector('.main_article.article__genres');
+  const indexTitle = GetLenguageIndex();
+  const titles = langs[indexTitle].captions
+  const genres = response.data.genres;
+  const containerGenres = document.querySelector('.main_article.article__genres');
   containerGenres.innerHTML = '';
-  let h2 = document.createElement('h2');
-  let text = document.createTextNode('Genres');
+  const h2 = document.createElement('h2');
+  const text = document.createTextNode(titles.genres);
   h2.appendChild(text);
   containerGenres.appendChild(h2);
   
@@ -175,7 +182,7 @@ async function GetGenresMovies(){
     let title = document.createTextNode(name);
     titleH2.appendChild(title);
     let button =document.createElement('button');
-    let buttonText = document.createTextNode('Ver mas');
+    let buttonText = document.createTextNode(titles.trendMore);
     button.appendChild(buttonText);
     button.addEventListener('click',()=>location.hash=`#categorie=${genre}-${name}`);
     titleH2.appendChild(title);
@@ -361,6 +368,8 @@ async function GetDetails(){
   CreateMovies(similarMoviesContainer,moviesRecommendations);
 }
 
+selectLanguage.addEventListener('change', ChangeLanguage);
+
 window.addEventListener('DOMContentLoaded',()=>{
   let claseLoad = 'load';
   let titleHomeContainer = document.querySelector('.article--title-container');
@@ -376,5 +385,37 @@ window.addEventListener('DOMContentLoaded',()=>{
   detailsInfo.classList.remove(claseLoad);
   movieGenres.classList.remove(claseLoad);
   detailsSimilar.classList.remove(claseLoad);
+  
+  let language = localStorage.getItem('language');
+  let titles;
+  let index;
+  if(language){
+    language = JSON.parse(language);
+    let languageSelected = langs.find(languageSelected =>languageSelected.lang == language.lang);
+    index = langs.indexOf(languageSelected);
+    titles = language.captions;
+  }else{
+    index = 0;
+    language = langs[index];
+    titles = language.captions;
+  }
+  selectLanguage.children[index].selected = true;
+  categoriesTitle.innerText = titles.category;
+  similarTitle.innerText = titles.similarTitle;
+  trendsTitle.innerText = titles.trends;
+  favoriteTitle.innerText = titles.likedTitle;
+  genresTitle.innerText = titles.genres;
+  trendingButton.innerText = titles.trendMore;
+  api = axios.create({
+    baseURL: 'https://api.themoviedb.org/3/',
+    headers:{
+      accept: 'application/json',
+    },
+    params: {
+      api_key:'349addc21a4cef2c51b020379c9efa28',
+      language: language.lang
+    },
+  });
+
   ValidateHash();
 })
